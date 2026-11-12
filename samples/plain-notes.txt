@@ -1,0 +1,4 @@
+Plain text import example.
+
+Each blank-line separated block becomes a paragraph.
+Single line breaks are kept.

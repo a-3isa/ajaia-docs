@@ -1,0 +1,36 @@
+# End-to-end UI check (Python Playwright). Usage: npm start, then: python test/e2e_ui.py http://localhost:3000
+from playwright.sync_api import sync_playwright
+import os
+import sys
+B=sys.argv[1] if len(sys.argv)>1 else "http://localhost:3000"; S="screenshots"; os.makedirs(S,exist_ok=True)
+errs=[]
+with sync_playwright() as p:
+    br=p.chromium.launch()
+    pg=br.new_page(viewport={"width":1280,"height":860})
+    pg.on("pageerror",lambda e:errs.append(str(e)))
+    pg.on("response",lambda r: r.status>=400 and errs.append(f"{r.request.method} {r.url} {r.status}"))
+    pg.goto(B); pg.screenshot(path=f"{S}/1-login.png")
+    pg.click("text=Alice Owner"); pg.wait_for_selector("text=My documents"); pg.screenshot(path=f"{S}/2-documents.png")
+    pg.click("text=+ New document"); pg.wait_for_selector(".tiptap")
+    pg.fill(".title-input","Launch plan")
+    pg.click(".tiptap"); pg.select_option(".toolbar select","1"); pg.keyboard.type("Launch plan")
+    pg.keyboard.press("Enter"); pg.keyboard.press("Control+b"); pg.keyboard.type("Bold goal"); pg.keyboard.press("Control+b")
+    pg.keyboard.type(" and "); pg.keyboard.press("Control+u"); pg.keyboard.type("underlined"); pg.keyboard.press("Control+u")
+    pg.keyboard.press("Enter"); pg.click("button[title='Bulleted list']"); pg.keyboard.type("First item"); pg.keyboard.press("Enter"); pg.keyboard.type("Second item")
+    pg.wait_for_selector("text=All changes saved", timeout=5000); pg.evaluate("window.scrollTo(0,0)"); pg.screenshot(path=f"{S}/3-editor.png")
+    url=pg.url; pg.reload(); pg.wait_for_selector(".tiptap h1")
+    html=pg.inner_html(".tiptap"); print("persisted:", "<strong>Bold goal</strong>" in html and "<u>underlined</u>" in html and "<ul>" in html, pg.input_value(".title-input"))
+    pg.click("text=Share"); pg.fill(".share-form input","bob@ajaia.test"); pg.select_option(".share-form select","editor"); pg.click(".share-form button")
+    pg.wait_for_selector(".people >> text=Bob Reviewer"); pg.screenshot(path=f"{S}/4-share.png"); pg.click("text=Done")
+    pg.click("text=Sign out"); pg.click("text=Bob Reviewer"); pg.wait_for_selector("text=Shared with me")
+    pg.screenshot(path=f"{S}/5-bob-shared.png")
+    pg.click("text=Welcome to Ajaia Docs"); pg.wait_for_selector("text=view-only"); pg.screenshot(path=f"{S}/6-viewer.png")
+    print("viewer editable:", pg.get_attribute(".tiptap","contenteditable"))
+    pg.goto(B+"/#/"); pg.click("text=Launch plan"); pg.wait_for_selector(".tiptap h1")
+    print("bob editor editable:", pg.get_attribute(".tiptap","contenteditable"))
+    open("/tmp/ajaia-notes.md","w").write("# Imported notes\n\n- **alpha**\n- beta\n")
+    pg.goto(B+"/#/"); pg.wait_for_selector("text=Import file")
+    pg.set_input_files("input[type=file]","/tmp/ajaia-notes.md"); pg.wait_for_selector(".tiptap h1"); print("import title:", pg.input_value(".title-input"))
+    pg.goto(B+"/#/"); pg.set_input_files("input[type=file]",files=[{"name":"x.png","mimeType":"image/png","buffer":b"x"}]); pg.wait_for_selector(".error"); print("bad upload:", pg.inner_text(".error"))
+    br.close()
+print("errors:", errs)
