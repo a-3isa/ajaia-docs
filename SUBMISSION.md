@@ -1,7 +1,8 @@
 # Submission: AI-Native Full Stack Developer Assignment
 
 **Candidate:** Ahmed Ibrahim Hussein Eisa
-**Live product URL:** `<add your Render URL here>`
+**Live product URL:** https://ajaia-docs-mhb9.onrender.com
+**Source code (GitHub):** https://github.com/a-3isa/ajaia-docs
 **Walkthrough video:** see `VIDEO_URL.txt`
 **Demo accounts:** `alice@ajaia.test`, `bob@ajaia.test`, `carol@ajaia.test`. Password: `demo1234` (one-click buttons are on the login screen).
 

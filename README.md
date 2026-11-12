@@ -2,7 +2,7 @@
 
 A small full-stack document editor loosely inspired by Google Docs. You can create, edit and format documents, import files, and share documents with other users as a viewer or an editor.
 
-**Live demo:** `<add your Render URL here>`
+**Live demo:** https://ajaia-docs-mhb9.onrender.com (Render free tier: the first load after idling can take ~30–50 s while the instance wakes up)
 **Demo accounts** (password for all: `demo1234`). The login screen also has one-click buttons for each.
 
 | User | Email | Seeded data |
@@ -38,11 +38,11 @@ The database is created automatically at `data/app.db` and seeded with the demo 
 
 ## Deploy (Render free tier)
 
-The repo includes a `render.yaml` blueprint.
+This is how the live demo is deployed. (A `render.yaml` blueprint is also included, but Render Blueprints require a card on file.)
 
 1. Push this repo to GitHub.
-2. On https://render.com, choose **New > Blueprint** and select the repo. Or create a **Web Service** with build command `npm ci --include=dev && npm run build` and start command `npm start`.
-3. Open the URL Render gives you. The demo users are seeded on startup.
+2. On https://render.com, create a **Web Service** (Free instance) from the repo with build command `npm ci --include=dev && npm run build` and start command `npm start`.
+3. Add env var `NODE_VERSION=22`. Open the URL Render gives you. The demo users are seeded on startup.
 
 > **Free-tier note:** Render's free instances have an ephemeral filesystem, so the SQLite file is reset when the service redeploys or restarts after idling. The seeded demo data always comes back. Within a session, documents and shares persist across refreshes, logins and users. For durable hosting, attach a Render persistent disk and set `DB_FILE` to a path on it, or swap the storage layer for Postgres (see ARCHITECTURE.md).
 
